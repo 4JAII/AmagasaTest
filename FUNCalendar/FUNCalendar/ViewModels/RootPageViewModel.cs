@@ -2,7 +2,6 @@
 using Prism.Navigation;
 using System.Threading.Tasks;
 using System.Collections.ObjectModel;
-using Xamarin.Forms;
 
 namespace FUNCalendar.ViewModels
 {
@@ -13,26 +12,17 @@ namespace FUNCalendar.ViewModels
             new MenuItem
             {
                 Title="Calendar",
-                PageName="CalendarPage",
-                Image=ImageSource.FromFile("CalendarIcon.png")
+                PageName="CalendarPage"
             },
             new MenuItem
             {
                 Title="ToDo",
-                PageName="ToDoListPage",
-                Image=ImageSource.FromFile("ToDoIcon.png")
+                PageName="ToDoListPage"
             },
-            new MenuItem
+                        new MenuItem
             {
                 Title="WishList",
-                PageName="WishListPage",
-                Image=ImageSource.FromFile("WishListIcon.png")
-            },
-            new MenuItem
-            {
-                Title="家計簿",
-                PageName="HouseHoldAccountsPage",
-                Image=ImageSource.FromFile("HouseHoldAccountsIcon.png")
+                PageName="WishListPage"
             }
         };
 

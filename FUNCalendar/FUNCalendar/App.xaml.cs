@@ -1,5 +1,6 @@
 ﻿using Prism.Unity;
 using FUNCalendar.Views;
+using FUNCalendar
 using Xamarin.Forms;
 
 namespace FUNCalendar
@@ -17,6 +18,7 @@ namespace FUNCalendar
 
         protected override void RegisterTypes()
         {
+            Container.RegisterType<I>()
 
             Container.RegisterTypeForNavigation<RootPage>();
             Container.RegisterTypeForNavigation<NavigationPage>();
@@ -24,7 +26,6 @@ namespace FUNCalendar
             Container.RegisterTypeForNavigation<CalendarPage>();
             Container.RegisterTypeForNavigation<WishListPage>();
             Container.RegisterTypeForNavigation<ToDoListPage>();
-            Container.RegisterTypeForNavigation<HouseHoldAccountsPage>();
         }
     }
 }
