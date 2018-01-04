@@ -429,12 +429,12 @@ namespace FUNCalendar.Models
 
             scnum = DcToIntSc(dc);
             Dtotal = CalucDCategory(r, dc, date);
-            Stotal = CalucSCategory(r, (SCategorys)scnum, date);
+            Stotal = CalucSCategory(r, (SCategorys)Enum.ToObject(typeof(SCategorys),scnum), date);
 
             if (Stotal > 0)
             {
-                ratio = Dtotal / Stotal;
-                remain = Dtotal % Stotal;
+                ratio = 100 * Dtotal / Stotal;
+                remain = 100 * Dtotal % Stotal;
                 if (remain >= 0.5 * Stotal)
                     ratio++;
             }

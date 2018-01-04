@@ -3,12 +3,46 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
              prism:ViewModelLocator.AutowireViewModel="True"
+             xmlns:oxy="clr-namespace:OxyPlot.Xamarin.Forms;assembly=OxyPlot.Xamarin.Forms"
              x:Class="FUNCalendar.Views.HouseHoldAccountsSCStatisticsPage">
     <ContentPage.ToolbarItems>
         <ToolbarItem Icon= "icon_add.png"
                      Text="Add"
                      Command="{Binding ResistCommand}"/>
     </ContentPage.ToolbarItems>
+
+    <StackLayout>
+        <oxy:PlotView Model = "{Binding DisplayPlotModel}"/>
+        <Label Text="{Binding DisplayScategoryTotal.Value}"/>
+
+        <ListView ItemsSource="{Binding DisplayScategoryItems}"
+                          HorizontalOptions="Center"
+                          SeparatorVisibility="None"
+                          HeightRequest="380">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="10*"/>
+                                <RowDefinition Height="9*"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="3*"/>
+                                <ColumnDefinition Width="3*"/>
+                                <ColumnDefinition Width="3*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Text="{Binding Dcategory}" Grid.Row="0" HorizontalOptions="Start" Grid.Column="0" Grid.ColumnSpan="2"/>
+                            <Label Text="{Binding Ratio}" Grid.Row="1" Grid.Column="1" HorizontalOptions="Start"/>
+                            <Label Text="{Binding Price}" Grid.Row="0" Grid.RowSpan="2" Grid.Column="3"/>
+                        </Grid>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </StackLayout>
+    
 <!--
     <Grid>
         <Grid.RowDefinitions>

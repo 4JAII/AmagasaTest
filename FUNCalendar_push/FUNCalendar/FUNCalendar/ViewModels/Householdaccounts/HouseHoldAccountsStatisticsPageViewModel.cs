@@ -237,13 +237,10 @@ namespace FUNCalendar.ViewModels
 
         public void OnNavigatedTo(NavigationParameters parameters)
         {
-            UpdatePage();
         }
 
         public void OnNavigatingTo(NavigationParameters parameters)
         {
-            UpdatePage();
-
         }
 
         /* グラフタイトルの設定 */
@@ -262,36 +259,5 @@ namespace FUNCalendar.ViewModels
             }
         }
 
-        public void UpdatePage()
-        {
-            /* デバッグ用 アイテム追加コマンド */
-            this.ResistCommand = new ReactiveCommand();
-
-            this.SelectIncome = new ReactiveCommand();
-
-
-            /* デバッグ用 アイテム追加ボタンが押された時の処理 */
-            ResistCommand.Subscribe(_ =>
-            {
-                DateTime temp = new DateTime(2017, 12, 16);
-                _householdaccounts.AddHouseHoldAccountsItem("test1", 2, 100, temp, DCategorys.朝食, SCategorys.食費, StorageTypes.財布, true);
-                _householdaccounts.AddHouseHoldAccountsItem("test2", 4, 300, DateTime.Today, DCategorys.消耗品, SCategorys.日用雑貨, StorageTypes.財布, true);
-                _householdaccounts.AddHouseHoldAccountsItem("test3", 1, 500, DateTime.Today, DCategorys.ボーナス, SCategorys.給料, StorageTypes.財布, false);
-                _householdaccounts.AddHouseHoldAccountsItem("test4", 1, 500, DateTime.Today, DCategorys.受取利息, SCategorys.投資収入, StorageTypes.財布, false);
-                _householdaccounts.AddHouseHoldAccountsItem("test4", 1, 2000, temp, DCategorys.その他_収入, SCategorys.その他_収入, StorageTypes.財布, false);
-                _householdaccounts.SetAllStatics(SelectedRange.Value.R, SelectedDate.Value);
-                _householdaccounts.SetAllStaticsPie(SelectedRange.Value.R, CurrentBalanceType, SelectedDate.Value);
-                CurrentBalance = BalanceTypeToTitleString(CurrentBalanceType);
-            }).AddTo(disposable);
-
-            SelectIncome.Subscribe(_ =>
-            {
-                CurrentBalanceType = BalanceTypes.incomes;
-                CurrentBalance = BalanceTypeToTitleString(CurrentBalanceType);
-                _householdaccounts.SetAllStaticsPie(SelectedRange.Value.R, CurrentBalanceType, SelectedDate.Value);
-            })
-            .AddTo(disposable);
-
-        }
     }
 }

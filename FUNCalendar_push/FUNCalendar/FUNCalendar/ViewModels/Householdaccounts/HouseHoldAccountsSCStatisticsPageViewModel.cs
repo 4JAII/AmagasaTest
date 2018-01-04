@@ -76,9 +76,15 @@ namespace FUNCalendar.ViewModels
             /* RectiveProperty化(グラフ凡例) */
             this.DisplayLegend = _householdaccounts.Legend.ToReadOnlyReactiveCollection(x => new VMHouseholdaccountLegendItem(x)).AddTo(disposable);
 
+            DisplaySlices = new List<PieSlice>();
 
-            _householdaccounts.SetSCategoryStatics(CurrentRange, (BalanceTypes)Enum.Parse(typeof(BalanceTypes), CurrentBalanceType), CurrentDate, (SCategorys)Enum.Parse(typeof(SCategorys), CurrentSCategory));
-            _householdaccounts.SetSCategoryStatisticsPie(CurrentRange, CurrentDate, (SCategorys)Enum.Parse(typeof(SCategorys), CurrentSCategory));
+            /* plotmodelにsliceを追加 */
+            pieseries.Slices = DisplaySlices;
+            this._plotmodel.Series.Add(pieseries);
+            UpdatePie();
+
+            /* グラフのデータが変更された時の処理 */
+            Slices.CollectionChangedAsObservable().Subscribe(_ => { UpdatePie(); });
 
             BackPageCommand.Subscribe(_ =>
             {
@@ -106,7 +112,17 @@ namespace FUNCalendar.ViewModels
                 this.CurrentSCategory = NavigationItem.SCItem.Scategory;
                 _householdaccounts.SetSCategoryStatics(CurrentRange, (BalanceTypes)Enum.Parse(typeof(BalanceTypes),CurrentBalanceType), CurrentDate, (SCategorys)Enum.Parse(typeof(SCategorys),CurrentSCategory));
                 _householdaccounts.SetSCategoryStatisticsPie(CurrentRange, CurrentDate, (SCategorys)Enum.Parse(typeof(SCategorys), CurrentSCategory));
+                this.DisplayScategoryTotal = _householdaccounts.ObserveProperty(h => h.SCategoryTotal).ToReactiveProperty().AddTo(disposable);
             }
+        }
+
+        /* グラフの更新 */
+        private void UpdatePie()
+        {
+            DisplaySlices.Clear();
+            DisplaySlices.AddRange(Slices.Where(x => x.Price > 0).Select(x => new PieSlice(null, x.Price) { Fill = OxyColor.Parse(x.ColorPath) }));
+            DisplayPlotModel = _plotmodel;
+            DisplayPlotModel.InvalidatePlot(true);
         }
 
         /* 購読解除 */
