@@ -3,51 +3,24 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
              prism:ViewModelLocator.AutowireViewModel="True"
+             xmlns:local="clr-namespace:FUNCalendar.ViewModels"
              xmlns:oxy="clr-namespace:OxyPlot.Xamarin.Forms;assembly=OxyPlot.Xamarin.Forms"
-             x:Class="FUNCalendar.Views.HouseHoldAccountsSCStatisticsPage">
+             xmlns:b="clr-namespace:FUNCalendar.Behaviors"
+             x:Class="FUNCalendar.Views.HouseHoldAccountsSCStatisticsPage"
+             Title="{Binding SCategoryTitle}">
+
     <ContentPage.ToolbarItems>
         <ToolbarItem Icon= "icon_add.png"
                      Text="Add"
                      Command="{Binding ResistCommand}"/>
     </ContentPage.ToolbarItems>
 
-    <StackLayout>
-        <oxy:PlotView Model = "{Binding DisplayPlotModel}"/>
-        <Label Text="{Binding DisplayScategoryTotal.Value}"/>
 
-        <ListView ItemsSource="{Binding DisplayScategoryItems}"
-                          HorizontalOptions="Center"
-                          SeparatorVisibility="None"
-                          HeightRequest="380">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <ViewCell>
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="10*"/>
-                                <RowDefinition Height="9*"/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                            </Grid.ColumnDefinitions>
-                            <Label Text="{Binding Dcategory}" Grid.Row="0" HorizontalOptions="Start" Grid.Column="0" Grid.ColumnSpan="2"/>
-                            <Label Text="{Binding Ratio}" Grid.Row="1" Grid.Column="1" HorizontalOptions="Start"/>
-                            <Label Text="{Binding Price}" Grid.Row="0" Grid.RowSpan="2" Grid.Column="3"/>
-                        </Grid>
-                    </ViewCell>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
-    </StackLayout>
-    
-<!--
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="40"/>
             <RowDefinition Height="30"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="5"/>
             <RowDefinition Height="250"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
@@ -58,7 +31,13 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
 
-        <DatePicker Grid.Row="0"
+        <Button Text="BackPage"
+                   Grid.Row="0"
+                Grid.Column="0"
+                Grid.ColumnSpan="4"
+                Command="{Binding BackPageCommand}"/>
+
+        <DatePicker Grid.Row="1"
                     Grid.Column="1"
                     Format="yyyy/mm/dd"
                     Date="{Binding SelectedDate.Value}"/>
@@ -68,38 +47,17 @@
                 ItemDisplayBinding="{Binding RangeName}"
                 HorizontalOptions="EndAndExpand"
                 WidthRequest="400"
-                Grid.Row="0"
+                Grid.Row="1"
                 Grid.Column="2"/>
-        <Grid Grid.Row="1"
-              Grid.Column="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition Width="50*"/>
-                <ColumnDefinition/>
-                <ColumnDefinition Width="50*"/>
-                <ColumnDefinition/>
-                <ColumnDefinition Width="50*"/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-            <Button Text="支出"
-                Command ="{Binding SelectOutgoing}"
-                    Grid.Column="1"/>
-            <Button Text="収入"
-                Command="{Binding SelectIncome}"
-                    Grid.Column="3"/>
-            <Button Text="差分"
-                Command="{Binding SelectDifference}"
-                    Grid.Column="5"/>
-        </Grid>
-
+        
         <oxy:PlotView Model = "{Binding DisplayPlotModel}"
-                      Grid.Row="2"
+                      Grid.Row="3"
                       Grid.Column="1"/>
 
         <ListView ItemsSource="{Binding DisplayLegend}"
                   HorizontalOptions="Center"
                   SeparatorVisibility ="None"
-                  Grid.Row="2"
+                  Grid.Row="3"
                   Grid.Column="2">
 
             <ListView.ItemTemplate>
@@ -121,7 +79,7 @@
 
         </ListView>
 
-        <ScrollView Grid.Row="3"
+        <ScrollView Grid.Row="4"
                     Grid.Column="1"
                     Grid.ColumnSpan="2"
                     HorizontalOptions="Center"
@@ -142,9 +100,9 @@
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-                <Label Text="支出" HorizontalOptions="StartAndExpand" FontAttributes="Bold" Grid.Row="0" Grid.Column="0"/>
-                <Label Text="{Binding DisplayTotalOutgoing.Value}" HorizontalOptions="StartAndExpand" FontAttributes="Bold" Grid.Row="0" Grid.Column="4"/>
-                <ListView ItemsSource="{Binding DisplayTotalOutgoingCollection}"
+                <Label Text="{Binding CurrentSCategory}" HorizontalOptions="StartAndExpand" FontAttributes="Bold" Grid.Row="0" Grid.Column="0"/>
+                <Label Text="{Binding DisplayScategoryTotal.Value}" HorizontalOptions="StartAndExpand" FontAttributes="Bold" Grid.Row="0" Grid.Column="4"/>
+                <ListView ItemsSource="{Binding DisplayScategoryItems}"
                           HorizontalOptions="Center"
                           SeparatorVisibility="None"
                           HeightRequest="380"
@@ -155,7 +113,7 @@
                     <ListView.Behaviors>
                         <b:ItemSelectedToCommandBehavior Command="{Binding ItemSelectedCommand}"/>
                     </ListView.Behaviors>
-
+                    
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <ViewCell>
@@ -170,7 +128,7 @@
                                         <ColumnDefinition Width="3*"/>
                                         <ColumnDefinition Width="3*"/>
                                     </Grid.ColumnDefinitions>
-                                    <Label Text="{Binding Sc}" Grid.Row="0" HorizontalOptions="Start" Grid.Column="0" Grid.ColumnSpan="2"/>
+                                    <Label Text="{Binding Dcategory}" Grid.Row="0" HorizontalOptions="Start" Grid.Column="0" Grid.ColumnSpan="2"/>
                                     <Label Text="{Binding Ratio}" Grid.Row="1" Grid.Column="1" HorizontalOptions="Start"/>
                                     <Label Text="{Binding Price}" Grid.Row="0" Grid.RowSpan="2" Grid.Column="3"/>
                                 </Grid>
@@ -180,5 +138,5 @@
                 </ListView>
             </Grid>
         </ScrollView>
-    </Grid>-->
+    </Grid>
 </ContentPage>
