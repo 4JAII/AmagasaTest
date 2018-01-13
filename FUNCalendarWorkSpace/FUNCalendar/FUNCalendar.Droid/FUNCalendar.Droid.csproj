@@ -18,7 +18,7 @@
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     <AndroidManifest>Properties\AndroidManifest.xml</AndroidManifest>
     <AndroidUseLatestPlatformSdk>true</AndroidUseLatestPlatformSdk>
-    <TargetFrameworkVersion>v7.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v6.0</TargetFrameworkVersion>
     <AndroidSupportedAbis>armeabi,armeabi-v7a,x86</AndroidSupportedAbis>
     <AndroidStoreUncompressedFileExtensions />
     <MandroidI18n />
@@ -159,7 +159,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-<<<<<<< HEAD:FUNCalendar/FUNCalendar.Droid/FUNCalendar.Droid.csproj
     <AndroidResource Include="Resources\drawable\icon_wishList.png" />
   </ItemGroup>
   <ItemGroup>
@@ -176,24 +175,6 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\drawable\icon_todo.png" />
-=======
-    <Content Include="Resources\drawable\icon_wishList.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Resources\drawable\icon_add.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Resources\drawable\icon_calendar.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Resources\drawable\icon_config.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Resources\drawable\icon_houseHoldAccounts.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Resources\drawable\icon_todo.png" />
->>>>>>> 5fa431e8604fe038be1733d96ca2f5cc4a0bbe2b:FUNCalendar_push/FUNCalendar/FUNCalendar.Droid/FUNCalendar.Droid.csproj
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
