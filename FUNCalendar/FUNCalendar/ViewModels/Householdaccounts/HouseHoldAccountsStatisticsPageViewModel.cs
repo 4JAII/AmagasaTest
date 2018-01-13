@@ -107,9 +107,15 @@ namespace FUNCalendar.ViewModels
             /* インスタンス化 */
             SelectedDate = new ReactiveProperty<DateTime>();
             SelectedDate.Value = DateTime.Today;
+<<<<<<< HEAD:FUNCalendar/FUNCalendar/ViewModels/Householdaccounts/HouseHoldAccountsStatisticsPageViewModel.cs
             SelectedRange = new ReactiveProperty<HouseholdaccountRangeItem>();
             BalanceCommand = new ReactiveCommand();
             HistoryCommand = new ReactiveCommand();
+=======
+
+            SelectedRange = new ReactiveProperty<HouseholdaccountRangeItem>();
+
+>>>>>>> 5fa431e8604fe038be1733d96ca2f5cc4a0bbe2b:FUNCalendar_push/FUNCalendar/FUNCalendar/ViewModels/Householdaccounts/HouseHoldAccountsStatisticsPageViewModel.cs
             DisplaySlices = new List<PieSlice>();
 
             /* ピッカー用のアイテムの作成 */
