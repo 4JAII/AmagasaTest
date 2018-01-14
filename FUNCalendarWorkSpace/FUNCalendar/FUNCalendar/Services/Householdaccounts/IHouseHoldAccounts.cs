@@ -33,6 +33,7 @@ namespace FUNCalendar.Models
         void SetSCategoryStatisticsPie(Range r, DateTime date, SCategorys sc);
         void SetDCategoryHistory(Range r, DateTime date, DCategorys dc);
         void AddHouseHoldAccountsItem(string name, int price, DateTime date, DCategorys detailcategory, SCategorys summarycategory, StorageTypes storagetype, bool isoutgoings);
+        void AddHouseHoldAccountsItem(HouseHoldAccountsItem item);
         void SetBalance();
         void IncrementBalancePrice(StorageTypes st, int price);
         void EditHouseholdaccountBalance(StorageTypes st, int price);

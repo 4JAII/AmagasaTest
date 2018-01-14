@@ -79,6 +79,8 @@ namespace FUNCalendar.Models
             IsOutGoings = isoutgoings;
         }
 
+        public HouseHoldAccountsItem(){ }
+
         /* Sort */
         public static int CompareByID(HouseHoldAccountsItem a, HouseHoldAccountsItem b)
         {

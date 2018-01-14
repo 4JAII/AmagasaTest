@@ -24,6 +24,7 @@ namespace FUNCalendar.ViewModels
     {
         private IHouseHoldAccounts _householdaccount;
         private INavigationService _navigationservice;
+        private IPageDialogService _pageDialogService;
 
         /* 正しい遷移か確認するためのkey */
         public static readonly string InputKey = "InputKey";
@@ -37,6 +38,8 @@ namespace FUNCalendar.ViewModels
         public ReactiveProperty<HouseholdaccountRangeItem> SelectedRange { get; private set; }   /* 範囲を格納 */
         /* 変更予定箇所END */
 
+        /* householdaccount登録用 */
+        public int ID { get; private set; } = -1;
         [Required(ErrorMessage = "タイトルを入力してください")]
         public ReactiveProperty<string> Name { get; private set; } = new ReactiveProperty<string>();
 
@@ -47,17 +50,29 @@ namespace FUNCalendar.ViewModels
         [Required(ErrorMessage ="日付を指定してください")]
         public ReactiveProperty<DateTime> Date { get; private set; } = new ReactiveProperty<DateTime>();
 
+        /* 登録・キャンセルするときの処理用 */
         public ReactiveProperty<bool> CanRegister { get; private set; }
         public AsyncReactiveCommand RegisterHouseholdaccountsCommand { get; private set; }
         public AsyncReactiveCommand CancelCommand { get; private set; }
 
+        /* エラー時の色 */
         public ReactiveProperty<Color> ErrorColor { get; private set; } = new ReactiveProperty<Color>();
 
-        public HouseholdaccountsRegisterPageViewModel(IHouseHoldAccounts householdaccount, INavigationService navigationService)
+        /* データベース用 */
+        //private LocalStorage localStorage; 
+
+        
+        
+        /* コンストラクタ */
+        public HouseholdaccountsRegisterPageViewModel(IHouseHoldAccounts householdaccount, INavigationService navigationService, IPageDialogService pageDialogService)
         {
+            //localStorage = new LocalStorage();
+
             this._householdaccount = householdaccount;
             this._navigationservice = navigationService;
+            this._pageDialogService = pageDialogService;
 
+            /* 属性を有効化 */
             Name.SetValidateAttribute(() => this.Name);
             Price.SetValidateAttribute(() => this.Price);
             Date.SetValidateAttribute(() => this.Date);
@@ -87,29 +102,42 @@ namespace FUNCalendar.ViewModels
                     R = Range.Year
                 }
             };
-            /* END */
-
-            /* 未実装
-            RegisterHouseholdaccountsCommand = CanRegister.ToAsyncReactiveCommand();
-            RegisterHouseholdaccountsCommand.Subscribe(async () =>
-            {
-                if ()
-                {
-                    var item = new VMHouseHoldAccountsItem(Name.Value, Price.Value, Date.Value, "交通費", "飛行機", "財布", "支出");
-                }
-                else
-                {
-
-                }
-            })
-            */
+            /* 変更箇所 END */
 
             CanRegister = new[]
-            {
+{
                 this.Name.ObserveHasErrors,
                 this.Price.ObserveHasErrors,
                 this.Date.ObserveHasErrors,
             }.CombineLatestValuesAreAllFalse().ToReactiveProperty<bool>();
+
+
+            RegisterHouseholdaccountsCommand = CanRegister.ToAsyncReactiveCommand();
+            RegisterHouseholdaccountsCommand.Subscribe(async () =>
+            {
+                if (ID != -1)
+                {
+                    var vmitem = new VMHouseHoldAccountsItem(ID, Name.Value, Price.Value, Date.Value, "食費", "朝食", "財布", "支出");
+                    var item = VMHouseHoldAccountsItem.ToHouseholdaccountsItem(vmitem);
+                    // await localStorage.EditItem(item);
+
+                }
+                else
+                {
+                    var item = new HouseHoldAccountsItem() { Name = this.Name.Value, Price = int.Parse(this.Price.Value), Date = this.Date.Value, DCategory = DCategorys.食料品, SCategory = SCategorys.食費, StorageType = StorageTypes.財布, IsOutGoings = true };
+                    //await localStorage.AddItem(new HouseholdaccontsItem(this.Name.Value, int.Parse(this.Price.Value), this.Date.Value, this.Dcategory.Value, this.Scategory.Value, this.Storagetype.Value, this.IsOutgoing.Value, -1));
+                    item.ID = -1/* localStorage.LastAddedHouseholdaccountsItemID */;
+                    _householdaccount.AddHouseHoldAccountsItem(item);
+                }
+                 await _navigationservice.NavigateAsync("/RootPage/NavigationPage/HouseholdaccountStatisticsPage");
+            });
+
+            CancelCommand = new AsyncReactiveCommand();
+            CancelCommand.Subscribe(async () =>
+            {
+                var result = await _pageDialogService.DisplayAlertAsync("確認", "入力をキャンセルし画面を変更します。よろしいですか？", "はい", "いいえ");
+                if (result) await _navigationservice.NavigateAsync("/RootPage/NavigationPage/HouseholdaccountStatisticsPage");
+            });
 
             CanRegister.Subscribe(x =>
             {

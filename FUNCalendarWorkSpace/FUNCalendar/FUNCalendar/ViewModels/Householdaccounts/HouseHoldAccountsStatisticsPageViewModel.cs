@@ -197,9 +197,12 @@ namespace FUNCalendar.ViewModels
             /* デバッグ用 アイテム追加ボタンが押された時の処理 */
             ResistCommand.Subscribe(_ =>
             {
-                _householdaccounts.AddHouseHoldAccountsItem("test4", 2000, DateTime.Today, DCategorys.その他_収入, SCategorys.その他_収入, StorageTypes.財布, false);
-                _householdaccounts.SetAllStatics(SelectedRange.Value.R, SelectedDate.Value);
-                _householdaccounts.SetAllStaticsPie(SelectedRange.Value.R, CurrentBalanceType, SelectedDate.Value);
+                var navigationitem = new HouseholdaccountNavigationItem(SelectedDate.Value, SelectedRange.Value.R);
+                var navigationparameter = new NavigationParameters()
+                {
+                    {HouseholdaccountsRegisterPageViewModel.InputKey, navigationitem }
+                };
+                _inavigationservice.NavigateAsync("/RootPage/NavigationPage/HouseholdaccountsRegisterPage");
             }).AddTo(disposable);
 
             /* グラフのデータが変更された時の処理 */

@@ -130,6 +130,18 @@ namespace FUNCalendar.Models
             SetBalance();
         }
 
+        public void AddHouseHoldAccountsItem(HouseHoldAccountsItem item)
+        {
+            allHouseHoldAccounts.Add(item);
+            var price = item.Price;
+            if (item.IsOutGoings)
+            {
+               price = -price;
+            }
+            IncrementBalancePrice(item.StorageType, price);
+            SetBalance();
+        }
+
         /* 全体の統計を表示するためのメソッド(main page) */
         public void SetAllStatics(Range r, DateTime date)
         {
