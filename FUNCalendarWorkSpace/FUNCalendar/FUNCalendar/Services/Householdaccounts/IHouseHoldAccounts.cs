@@ -37,5 +37,7 @@ namespace FUNCalendar.Models
         void SetBalance();
         void IncrementBalancePrice(StorageTypes st, int price);
         void EditHouseholdaccountBalance(StorageTypes st, int price);
+        int ScToDcStart(SCategorys sc);
+        int ScToDcEnd(SCategorys sc);
     }
 }

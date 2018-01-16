@@ -20,11 +20,13 @@ using System.ComponentModel.DataAnnotations;
 
 namespace FUNCalendar.ViewModels
 {
-    public class HouseholdaccountsRegisterPageViewModel : BindableBase,INavigationAware
+    public class HouseholdaccountsRegisterPageViewModel : BindableBase,INavigationAware,IDisposable
     {
         private IHouseHoldAccounts _householdaccount;
         private INavigationService _navigationservice;
         private IPageDialogService _pageDialogService;
+
+        private CompositeDisposable disposable { get; } = new CompositeDisposable();
 
         /* 正しい遷移か確認するためのkey */
         public static readonly string InputKey = "InputKey";
@@ -32,11 +34,20 @@ namespace FUNCalendar.ViewModels
         /* 遷移されたときの格納用変数 */
         public HouseholdaccountNavigationItem NavigatedItem { get; set; }
 
-        /* 変更予定箇所 */
-        public HouseholdaccountRangeItem[] RangeNames { get; private set; }
-        public ReactiveProperty<DateTime> SelectedDate { get; private set; }    /* 日付を格納 */
-        public ReactiveProperty<HouseholdaccountRangeItem> SelectedRange { get; private set; }   /* 範囲を格納 */
-        /* 変更予定箇所END */
+        /* 現在選択されている各データを保持 */
+        public DateTime CurrentDate { get; private set; }
+        public Range CurrentRange { get; private set; }
+        
+        /* 収支変更用コマンド */
+        public ReactiveCommand IncomeCommand { get; private set; }
+        public ReactiveCommand OutgoingCommand { get; private set; }
+
+        /* ピッカー */
+        public List<HouseholdaccountsSCategoryItem> IncomeScategoryNames { get; private set; }
+        public List<HouseholdaccountsSCategoryItem> OutgoingScategoryNames { get; private set; }
+        public ReactiveCollection<HouseholdaccountsSCategoryItem> ScategoryNames { get; private set; }
+        public ReactiveCollection<HouseholdaccountsDcategoryItem> DcategoryNames { get; private set; }
+        public List<HouseholdaccountsStorageTypeItem> StorageNames { get; private set; }
 
         /* householdaccount登録用 */
         public int ID { get; private set; } = -1;
@@ -47,8 +58,11 @@ namespace FUNCalendar.ViewModels
         [RegularExpression("[0-9]+")]
         public ReactiveProperty<string> Price { get; private set; } = new ReactiveProperty<string>();
 
-        [Required(ErrorMessage ="日付を指定してください")]
         public ReactiveProperty<DateTime> Date { get; private set; } = new ReactiveProperty<DateTime>();
+        public ReactiveProperty<HouseholdaccountsSCategoryItem> CurrentScategory { get; private set; }
+        public ReactiveProperty<HouseholdaccountsDcategoryItem> CurrentDcategory { get; private set; }
+        public ReactiveProperty<HouseholdaccountsStorageTypeItem> CurrentStorageType { get; private set; }
+        public ReactiveProperty<bool> IsOutgoing { get; private set; }
 
         /* 登録・キャンセルするときの処理用 */
         public ReactiveProperty<bool> CanRegister { get; private set; }
@@ -75,46 +89,88 @@ namespace FUNCalendar.ViewModels
             /* 属性を有効化 */
             Name.SetValidateAttribute(() => this.Name);
             Price.SetValidateAttribute(() => this.Price);
-            Date.SetValidateAttribute(() => this.Date);
 
-            Date.Value = DateTime.Today;
+            /* ピッカー用のアイテム作成 */
+            IncomeScategoryNames = new List<HouseholdaccountsSCategoryItem>();
+            OutgoingScategoryNames = new List<HouseholdaccountsSCategoryItem>();
+            CurrentScategory = new ReactiveProperty<HouseholdaccountsSCategoryItem>();
 
-            /* 変更予定箇所 */
-            SelectedDate = new ReactiveProperty<DateTime>();
-            SelectedDate.Value = DateTime.Today;
-            SelectedRange = new ReactiveProperty<HouseholdaccountRangeItem>();
+            DcategoryNames = new ReactiveCollection<HouseholdaccountsDcategoryItem>();
+            CurrentDcategory = new ReactiveProperty<HouseholdaccountsDcategoryItem>();
 
-            RangeNames = new[]
+            StorageNames = new List<HouseholdaccountsStorageTypeItem>();
+            CurrentStorageType = new ReactiveProperty<HouseholdaccountsStorageTypeItem>();
+
+            StorageNames.Clear();
+            for (int i = (int)StorageTypes.start_of_Stype + 1; i < (int)StorageTypes.end_of_Stype; i++)
             {
-                new HouseholdaccountRangeItem
-                {
-                    RangeName = "統計:日単位",
-                    R = Range.Day
-                },
-                new HouseholdaccountRangeItem
-                {
-                    RangeName = "統計:月単位" ,
-                    R = Range.Month
-                },
-                new HouseholdaccountRangeItem
-                {
-                    RangeName = "統計:年単位",
-                    R = Range.Year
-                }
-            };
-            /* 変更箇所 END */
+                var stname = Enum.GetName(typeof(StorageTypes), i);
+                var stdata = (StorageTypes)Enum.ToObject(typeof(StorageTypes), i);
+                var item = new HouseholdaccountsStorageTypeItem(stname, stdata);
+                StorageNames.Add(item);
+            }
+            CurrentStorageType.Value = StorageNames[0];
 
+            for (int i = (int)SCategorys.start_of_支出 + 1; i < (int)SCategorys.end_of_支出; i++)
+            {
+                var scname = Enum.GetName(typeof(SCategorys), i);
+                var scdata = (SCategorys)Enum.ToObject(typeof(SCategorys), i);
+                var item = new HouseholdaccountsSCategoryItem(scname, scdata);
+                OutgoingScategoryNames.Add(item);
+            }
+            for (int i = (int)SCategorys.start_of_収入 + 1; i < (int)SCategorys.end_of_収入; i++)
+            {
+                var scname = Enum.GetName(typeof(SCategorys), i);
+                var scdata = (SCategorys)Enum.ToObject(typeof(SCategorys), i);
+                var item = new HouseholdaccountsSCategoryItem(scname, scdata);
+                IncomeScategoryNames.Add(item);
+            }
+
+            ScategoryNames = new ReactiveCollection<HouseholdaccountsSCategoryItem>();
+            foreach(HouseholdaccountsSCategoryItem x in OutgoingScategoryNames)
+            {
+                ScategoryNames.Add(x);
+            }
+
+            CurrentScategory.Value = ScategoryNames[0];
+
+            IsOutgoing = new ReactiveProperty<bool>();
+            IsOutgoing.Value = true;
+
+            IncomeCommand = new ReactiveCommand();
+            IncomeCommand.Subscribe(_ =>
+            {
+                IsOutgoing.Value = false;
+                UpdateScategory(false);
+            }).AddTo(disposable);
+
+            OutgoingCommand = new ReactiveCommand();
+            OutgoingCommand.Subscribe(_ =>
+            {
+                IsOutgoing.Value = true;
+                UpdateScategory(true);
+            }).AddTo(disposable);
+
+            /* 登録できるかどうか */
             CanRegister = new[]
-{
+            {
                 this.Name.ObserveHasErrors,
                 this.Price.ObserveHasErrors,
-                this.Date.ObserveHasErrors,
             }.CombineLatestValuesAreAllFalse().ToReactiveProperty<bool>();
+            CanRegister.Subscribe(x =>
+            {
+                ErrorColor.Value = x ? Color.SkyBlue : Color.Gray;
+            });
 
-
+            /* 登録ボタンが押された時の処理 */
             RegisterHouseholdaccountsCommand = CanRegister.ToAsyncReactiveCommand();
             RegisterHouseholdaccountsCommand.Subscribe(async () =>
             {
+                var navigationitem = new HouseholdaccountNavigationItem(CurrentDate, CurrentRange);
+                var navigationparameter = new NavigationParameters()
+                {
+                    {HouseHoldAccountsStatisticsPageViewModel.InputKey, navigationitem }
+                };
                 if (ID != -1)
                 {
                     var vmitem = new VMHouseHoldAccountsItem(ID, Name.Value, Price.Value, Date.Value, "食費", "朝食", "財布", "支出");
@@ -124,29 +180,37 @@ namespace FUNCalendar.ViewModels
                 }
                 else
                 {
-                    var item = new HouseHoldAccountsItem() { Name = this.Name.Value, Price = int.Parse(this.Price.Value), Date = this.Date.Value, DCategory = DCategorys.食料品, SCategory = SCategorys.食費, StorageType = StorageTypes.財布, IsOutGoings = true };
+                    var name = this.Name.Value;
+                    var price = int.Parse(this.Price.Value);
+                    var date = this.Date.Value;
+                    var dcategory = CurrentDcategory.Value.DcategoryData;
+                    var scategory = CurrentScategory.Value.ScategoryData;
+                    var storagetype = CurrentStorageType.Value.StorageTypeData;
+                    var isoutgoing = IsOutgoing.Value;
+                    var item = new HouseHoldAccountsItem() { Name = name, Price = price, Date = date, DCategory = dcategory, SCategory = scategory, StorageType = storagetype, IsOutGoings = isoutgoing };
                     //await localStorage.AddItem(new HouseholdaccontsItem(this.Name.Value, int.Parse(this.Price.Value), this.Date.Value, this.Dcategory.Value, this.Scategory.Value, this.Storagetype.Value, this.IsOutgoing.Value, -1));
-                    item.ID = -1/* localStorage.LastAddedHouseholdaccountsItemID */;
+                    item.ID = -1;/* localStorage.LastAddedHouseholdaccountsItemID ;*/
                     _householdaccount.AddHouseHoldAccountsItem(item);
                 }
-                 await _navigationservice.NavigateAsync("/RootPage/NavigationPage/HouseholdaccountStatisticsPage");
+                 await _navigationservice.NavigateAsync("/RootPage/NavigationPage/HouseHoldAccountsStatisticsPage",navigationparameter);
             });
 
+            /* キャンセルボタンが押された時の処理 */
             CancelCommand = new AsyncReactiveCommand();
             CancelCommand.Subscribe(async () =>
             {
+                var navigationitem = new HouseholdaccountNavigationItem(CurrentDate, CurrentRange);
+                var navigationparameter = new NavigationParameters()
+                {
+                    {HouseHoldAccountsStatisticsPageViewModel.InputKey, navigationitem }
+                };
                 var result = await _pageDialogService.DisplayAlertAsync("確認", "入力をキャンセルし画面を変更します。よろしいですか？", "はい", "いいえ");
-                if (result) await _navigationservice.NavigateAsync("/RootPage/NavigationPage/HouseholdaccountStatisticsPage");
+                if (result) await _navigationservice.NavigateAsync("/RootPage/NavigationPage/HouseHoldAccountsStatisticsPage", navigationparameter);
             });
-
-            CanRegister.Subscribe(x =>
-            {
-                ErrorColor.Value = x ? Color.SkyBlue : Color.Gray;
-            });
-
         }
         public void OnNavigatedFrom(NavigationParameters parameters)
         {
+            disposable.Dispose();
         }
 
         public void OnNavigatedTo(NavigationParameters parameters)
@@ -154,15 +218,67 @@ namespace FUNCalendar.ViewModels
             if (parameters.ContainsKey(InputKey))
             {
                 NavigatedItem = (HouseholdaccountNavigationItem)parameters[InputKey];
-                this.SelectedDate.Value = NavigatedItem.CurrentDate;
-                this.SelectedRange.Value = (NavigatedItem.CurrentRange == Range.Day) ? RangeNames[0] :
-                    (NavigatedItem.CurrentRange == Range.Month) ? RangeNames[1] :
-                    (NavigatedItem.CurrentRange == Range.Year) ? RangeNames[2] : null;
+                this.CurrentDate = NavigatedItem.CurrentDate;
+                this.CurrentRange = NavigatedItem.CurrentRange;
+
+                /* 指定された日付に設定 */
+                Date.Value = CurrentDate;
+                CurrentScategory.Subscribe(_ =>
+                {
+                    if(_ != null)
+                    {
+                        UpdateDcategory(_.ScategoryData);
+                    }
+                }).AddTo(disposable);
             }
         }
 
         public void OnNavigatingTo(NavigationParameters parameters)
         {
         }
+        private void UpdateScategory(bool isoutgoing)
+        {
+            if (isoutgoing)
+            {
+                ScategoryNames.Clear();
+                foreach (HouseholdaccountsSCategoryItem x in OutgoingScategoryNames)
+                {
+                    ScategoryNames.Add(x);
+                }
+                CurrentScategory.Value = ScategoryNames[0];
+            }
+            else
+            {
+                ScategoryNames.Clear();
+                foreach(HouseholdaccountsSCategoryItem x in IncomeScategoryNames)
+                {
+                    ScategoryNames.Add(x);
+                }
+                CurrentScategory.Value = ScategoryNames[0];
+            }
+        }
+
+        private void UpdateDcategory(SCategorys sc)
+        {
+            var startpoint = _householdaccount.ScToDcStart(sc);
+            var endpoint = _householdaccount.ScToDcEnd(sc);
+
+            DcategoryNames.Clear();
+            for (int i = startpoint + 1; i < endpoint; i++)
+            {
+                var dcname = Enum.GetName(typeof(DCategorys), i);
+                var dcdata = (DCategorys)Enum.ToObject(typeof(DCategorys), i);
+                var item = new HouseholdaccountsDcategoryItem(dcname, dcdata);
+
+                DcategoryNames.Add(item);
+            }
+            CurrentDcategory.Value = DcategoryNames[0];
+        }
+        /* 購読解除 */
+        public void Dispose()
+        {
+            disposable.Dispose();
+        }
+
     }
 }
