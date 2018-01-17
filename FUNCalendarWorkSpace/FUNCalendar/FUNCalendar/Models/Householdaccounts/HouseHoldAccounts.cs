@@ -14,6 +14,7 @@ namespace FUNCalendar.Models
     public class HouseHoldAccounts : BindableBase, IHouseHoldAccounts
     {
         private List<HouseHoldAccountsItem> allHouseHoldAccounts;
+        public HouseHoldAccountsItem SelectedItem { get; set; }
         private static int idCount;
         public int IDCount { get { return idCount; } private set { idCount = value; } }
 
@@ -130,6 +131,7 @@ namespace FUNCalendar.Models
             SetBalance();
         }
 
+        /* アイテム追加 */
         public void AddHouseHoldAccountsItem(HouseHoldAccountsItem item)
         {
             allHouseHoldAccounts.Add(item);
@@ -139,6 +141,20 @@ namespace FUNCalendar.Models
                price = -price;
             }
             IncrementBalancePrice(item.StorageType, price);
+            SetBalance();
+        }
+
+        /* アイテム設定 */
+        public void SetHouseholdaccountsItem(HouseHoldAccountsItem item)
+        {
+            SelectedItem = item;
+        }
+
+        /* アイテムの編集 */
+        public void EditHouseholdaccountsItem(HouseHoldAccountsItem deleteItem, HouseHoldAccountsItem additem)
+        {
+            allHouseHoldAccounts.RemoveAll(item => item.ID == deleteItem.ID);
+            AddHouseHoldAccountsItem(additem);
             SetBalance();
         }
 

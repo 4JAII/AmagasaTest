@@ -6,20 +6,19 @@ using System.Text;
 using System.Threading.Tasks;
 using FUNCalendar.Models;
 
-namespace FUNCalendar.Models
+namespace FUNCalendar.Services
 {
     public interface IWishList
     {
         ObservableCollection<WishItem> SortedWishList { get; }
         WishItem DisplayWishItem { get; set; }
         bool IsAscending { get; set; }
-        int IDCount { get; }
         void SortByID();
         void SortByName();
         void SortByPrice();
         void SortByDate();
-        void AddWishItem(string name, int price, DateTime date, bool isBought, bool isAddToDo);
         void AddWishItem(WishItem wishItem);
+        void InitializeList(List<WishItem> list);
         void SetDisplayWishItem(WishItem wishItem);
         void Remove(WishItem wishItem);
         void EditWishItem(WishItem deleteWishItem,WishItem addWishItem);

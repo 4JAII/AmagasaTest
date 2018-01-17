@@ -194,7 +194,7 @@ namespace FUNCalendar.ViewModels
             })
             .AddTo(disposable);
 
-            /* デバッグ用 アイテム追加ボタンが押された時の処理 */
+            /* アイテム追加ボタンが押された時の処理 */
             ResistCommand.Subscribe(async _ =>
             {
                 var navigationitem = new HouseholdaccountNavigationItem(SelectedDate.Value, SelectedRange.Value.RangeData);
@@ -221,6 +221,7 @@ namespace FUNCalendar.ViewModels
                 _inavigationservice.NavigateAsync("/RootPage/NavigationPage/HouseHoldAccountsSCStatisticsPage", navigationparameter);
             });
 
+
             /* 残高ボタンが押されたときの処理 */
             BalanceCommand.Subscribe(_ =>
             {
@@ -233,14 +234,14 @@ namespace FUNCalendar.ViewModels
             }).AddTo(disposable);
 
             /* 履歴ボタンが押されたときの処理 */
-            HistoryCommand.Subscribe(_ =>
+            HistoryCommand.Subscribe(async _ =>
             {
                 var navigationitem = new HouseholdaccountNavigationItem(SelectedDate.Value, SelectedRange.Value.RangeData);
                 var navigationparameter = new NavigationParameters()
                 {
                     {HouseholdaccountBalancePageViewModel.InputKey, navigationitem }
                 };
-                _inavigationservice.NavigateAsync("/RootPage/NavigationPage/HouseholdaccountsHistoryPage", navigationparameter);
+                await _inavigationservice.NavigateAsync("/RootPage/NavigationPage/HouseholdaccountsHistoryPage", navigationparameter);
             }).AddTo(disposable);
 
         }

@@ -30,6 +30,7 @@ namespace FUNCalendar.ViewModels
 
         /* 正しい遷移か確認するためのkey */
         public static readonly string InputKey = "InputKey";
+        public static readonly string EditKey = "EditKey";
 
         /* 遷移されたときの格納用変数 */
         public HouseholdaccountNavigationItem NavigatedItem { get; set; }
@@ -133,6 +134,14 @@ namespace FUNCalendar.ViewModels
             }
 
             CurrentScategory.Value = ScategoryNames[0];
+            CurrentScategory.Subscribe(_ =>
+            {
+                if (_ != null)
+                {
+                    UpdateDcategory(_.ScategoryData);
+                }
+            }).AddTo(disposable);
+
 
             IsOutgoing = new ReactiveProperty<bool>();
             IsOutgoing.Value = true;
@@ -173,7 +182,11 @@ namespace FUNCalendar.ViewModels
                 };
                 if (ID != -1)
                 {
-                    var vmitem = new VMHouseHoldAccountsItem(ID, Name.Value, Price.Value, Date.Value, "食費", "朝食", "財布", "支出");
+                    var scategory = Enum.GetName(typeof(SCategorys), CurrentScategory.Value.ScategoryData);
+                    var dcategory = Enum.GetName(typeof(DCategorys), CurrentDcategory.Value.DcategoryData);
+                    var storagetype = Enum.GetName(typeof(StorageTypes), CurrentStorageType.Value.StorageTypeData);
+                    var isoutgoing = IsOutgoing.Value ? "支出": "収入";
+                    var vmitem = new VMHouseHoldAccountsItem(ID, Name.Value, Price.Value, Date.Value, scategory, dcategory, storagetype, isoutgoing);
                     var item = VMHouseHoldAccountsItem.ToHouseholdaccountsItem(vmitem);
                     // await localStorage.EditItem(item);
 
@@ -221,21 +234,55 @@ namespace FUNCalendar.ViewModels
                 this.CurrentDate = NavigatedItem.CurrentDate;
                 this.CurrentRange = NavigatedItem.CurrentRange;
 
-                /* 指定された日付に設定 */
                 Date.Value = CurrentDate;
-                CurrentScategory.Subscribe(_ =>
+            }
+            else if (parameters.ContainsKey(EditKey))
+            {
+                NavigatedItem = (HouseholdaccountNavigationItem)parameters[EditKey];
+                this.CurrentDate = NavigatedItem.CurrentDate;
+                this.CurrentRange = NavigatedItem.CurrentRange;
+                Date.Value = CurrentDate;
+
+                VMHouseHoldAccountsItem vmitem = new VMHouseHoldAccountsItem(_householdaccount.SelectedItem);
+                HouseHoldAccountsItem item = _householdaccount.SelectedItem;
+                Regex re = new Regex(@"[^0-9]");
+                ID = vmitem.ID;
+                Name.Value = vmitem.Name;
+                Price.Value = re.Replace(vmitem.Price, "");
+                Date.Value = _householdaccount.SelectedItem.Date;
+                IsOutgoing.Value = _householdaccount.SelectedItem.IsOutGoings;
+                UpdateScategory(IsOutgoing.Value);
+                foreach(HouseholdaccountsSCategoryItem x in ScategoryNames)
                 {
-                    if(_ != null)
+                    if(x.ScategoryData == item.SCategory)
                     {
-                        UpdateDcategory(_.ScategoryData);
+                        CurrentScategory.Value = x;
+                        break;
                     }
-                }).AddTo(disposable);
+                }
+                foreach(HouseholdaccountsDcategoryItem x in DcategoryNames)
+                {
+                    if(x.DcategoryData == item.DCategory)
+                    {
+                        CurrentDcategory.Value = x;
+                        break;
+                    }
+                }
+                foreach(HouseholdaccountsStorageTypeItem x in StorageNames)
+                {
+                    if(x.StorageTypeData == item.StorageType)
+                    {
+                        CurrentStorageType.Value = x;
+                        break;
+                    }
+                }
             }
         }
 
         public void OnNavigatingTo(NavigationParameters parameters)
         {
         }
+
         private void UpdateScategory(bool isoutgoing)
         {
             if (isoutgoing)
